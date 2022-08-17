@@ -80,6 +80,7 @@ def profile(name):
         if request.method == 'POST':
             session.pop('UserLogged')
             logout_user()
+            flash('Successfully logout', category='success')
             return redirect(url_for('login'))
         return render_template('player_greeting.html',
                                user_name=name, classes=player_classes,
@@ -101,8 +102,9 @@ def login():
             user_password = user['password']
             if check_password_hash(user_password, request.form['psw']):
                 user_login = UserLogin().create(user)
-                login_user(user_login)
+                remember = request.form['remember']
                 session['UserLogged'] = request.form['username']
+                login_user(user_login, remember=remember)
                 flash('Successfully logged', category='success')
                 return redirect(url_for('profile', name=session['UserLogged'],
                                         pages_list=pages_list))

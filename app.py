@@ -11,11 +11,16 @@ app.config.from_object(__name__)
 app.config.update({'DATABASE': Path(app.root_path) / DATABASE})
 
 login_manager = LoginManager(app)
+login_manager.login_view = 'login'
+login_manager.login_message = 'Authorize, please, to get access to restricted pages.'
+login_manager.login_message_category = 'success'
+
 
 def connect_db() -> sqlite3.Connection:
     conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
     return conn
+
 
 def create_db():
     db = connect_db()
