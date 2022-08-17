@@ -1,24 +1,21 @@
 from scripts.DataBase import DataBase
+from flask_login import UserMixin
 
 
-class UserLogin:
+class UserLogin(UserMixin):
 
     def create(self, user: dict) -> 'UserLogin':
         self.__user = user
         return self
 
-    def fromDB(self, username, db: DataBase):
+    def fromDB(self, username, db: DataBase) -> 'UserLogin':
         self.__user = db.getUser(username)
         return self
 
-    def is_authenticated(self):
-        return True
-
-    def is_active(self):
-        return True
-
-    def is_anonymous(self):
-        return False
-
-    def get_id(self):
+    @property
+    def id(self):
         return str(self.__user['id'])
+
+    @property
+    def name(self):
+        return str(self.__user['name'])

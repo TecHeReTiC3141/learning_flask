@@ -90,7 +90,7 @@ def profile(name):
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
-    if 'UserLogged' in session:
+    if current_user.is_authorized:
         return redirect(url_for('profile', name=session['UserLogged'],
                                 pages_list=pages_list))
     elif request.method == 'POST':
@@ -102,11 +102,10 @@ def login():
             user_password = user['password']
             if check_password_hash(user_password, request.form['psw']):
                 user_login = UserLogin().create(user)
-                remember = request.form['remember']
-                session['UserLogged'] = request.form['username']
+                remember = True if request.form.get('remember') else False
                 login_user(user_login, remember=remember)
                 flash('Successfully logged', category='success')
-                return redirect(url_for('profile', name=session['UserLogged'],
+                return redirect(request.args.get('next') or url_for('profile', name=session['UserLogged'],
                                         pages_list=pages_list))
             else:
                 flash('Wrong username or password', category='error')
@@ -116,7 +115,7 @@ def login():
 
 @app.route('/register', methods=['POST', 'GET'])
 def register():
-    if 'UserLogged' in session:
+    if current_user.is_authorized:
         return redirect(url_for('profile', name=session['UserLogged'],
                                 pages_list=pages_list))
     if request.method == 'POST':
@@ -128,7 +127,6 @@ def register():
         if res == 'Successfully added':
             user = UserLogin().create(dbase.getUser(name))
             login_user(user)
-            session['UserLogged'] = name
             return redirect(url_for('profile', name=session['UserLogged'],
                                     pages_list=pages_list))
     return render_template('register.html')
