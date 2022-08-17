@@ -1,0 +1,20 @@
+.flash {
+    border: 1px solid;
+    padding: 10px;
+}
+
+.flash.success {
+    background: greenyellow;
+
+}
+
+.flash.error {
+    background: red;
+}
+
+form.login-form {
+    background: aquamarine;
+    border: solid 2px greenyellow;
+    justify-content: center;
+    padding: 20px;
+}

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+{% block head %}
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %} HomePage {% endblock %}</title>
+    <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='css/main_appear.css') }}">
+    <link rel="icon" href="/images/favicon.ico">
+
+</head>
+{% endblock %}
+
+<body>
+{% block header %}
+
+<header>
+    <h1>TecGame!</h1>
+    <ul class="pages_list">
+        <li> <a href="{{ url_for('classes') }}"> Классы TecGame </a> </li>
+        <li> <a href="{{ url_for('login') }}"> Логин/Вход в профиль </a> </li>
+        <li> <a href="{{ url_for('news_list') }}"> Новости и статьи </a> </li>
+        <li> <a href="{{ url_for('feedback') }}"> Оставить отзыв </a> </li>
+    </ul>
+    <br>
+</header>
+{% endblock %}
+
+{% block content %}
+    <div class="content">
+
+    {% if'UserLogged' in session %}
+        <h1>Hello, {{ session['UserLogged'] }}! Here's what you can do here:</h1>
+    {% else %}
+        <h1>Hello, anybody. Please <a href="{{ url_for('login') }}">Login</a>
+            or <a href="{{ url_for('register') }}">register</a> to open all functionality of site</h1>
+    {% endif %}
+
+
+</div>
+{% endblock %}
+
+{% block footer %}
+    <footer>
+        <h3><b><a href="/">TecGame</a>, best online game ever</b></h3>
+        <br>
+    </footer>
+
+</body>
+</html>
+{% endblock %}

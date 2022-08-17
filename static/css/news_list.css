@@ -1,0 +1,25 @@
+div.article {
+    background: beige;
+    border: solid 2px gray;
+    margin: 10px;
+}
+
+div.article h3 {
+    background: darkgray;
+}
+
+div.article p.views {
+    text-align: right;
+}
+
+ul.news {
+    list-style: none;
+}
+
+table.top_users {
+    border: 2px solid black;
+}
+
+table.top_users td, table.top_users th  {
+    border-bottom: 2px solid black;
+}

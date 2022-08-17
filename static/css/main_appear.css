@@ -1,0 +1,47 @@
+body {
+    font-family: sans-serif;
+    background: azure;
+}
+
+div.content {
+    margin: 10px;
+    border: black 10px;
+}
+
+header {
+    border: 2px solid;
+    background: coral;
+}
+
+footer {
+    background: antiquewhite;
+    justify-content: center;
+}
+
+ul.pages_list {
+    list-style-type: none;
+    color: whitesmoke;
+    max-width: available;
+    margin-bottom: 20px;
+    margin-top: 20px;
+}
+
+ul.pages_list a {
+    color: whitesmoke;
+
+}
+
+ul.pages_list > li:hover {
+     background: #111111;
+}
+
+ul.pages_list > li:last-child {
+}
+
+ul.pages_list > li {
+    padding: 10px;
+    color: whitesmoke;
+    float: left;
+    background: #333333;
+}
+

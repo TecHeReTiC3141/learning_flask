@@ -1,0 +1,32 @@
+{% extends 'home_page.html' -%}
+
+{% block head %}
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %} FeedBack {% endblock %}</title>
+    <link type="text/css" rel="stylesheet" href=" {{ url_for('static', filename='css/main_appear.css') }}">
+    <link type="text/css" rel="stylesheet" href=" {{ url_for('static', filename='css/form_appear.css') }}">
+</head>
+{% endblock %}
+
+{% block content %}
+    {% for cat, msg in get_flashed_messages(True) %}
+        <div class="flash {{ cat }}"> {{ msg }} </div>
+    {% endfor %}
+
+    <form action='{{ url_for('login') }}' method="post" class="login-form">
+        <p><label> UserName
+            <input type="text" name="username" value="" required>
+        </label></p>
+        <p><label> Password
+            <input type="password" name="psw" value="" required>
+        </label></p>
+        <p><label>
+            <input type="checkbox" name="remember" value=""> Remember me
+        </label></p>
+        <input type="submit" value="Send">
+    </form>
+    <p> Or <a href="{{ url_for('register') }}">register</a> if you haven't created account yet</p>
+{% endblock %}
+
+

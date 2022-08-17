@@ -1,0 +1,11 @@
+{% extends 'home_page.html' %}
+
+{% block title %}
+{{ article.title }}
+{% endblock %}
+
+{% block content %}
+    <a class="back" href="{{ url_for('news_list') }}">Back to all news</a>
+    <h3 class="title"> {{ article.author }}, {{ article.time_posted }}</h3>
+    <p class="text"> {{ article.content | safe }}</p>
+{% endblock %}

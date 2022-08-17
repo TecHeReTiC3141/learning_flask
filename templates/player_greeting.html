@@ -1,0 +1,18 @@
+{% extends 'home_page.html' -%}
+
+{% block title %}
+Hello
+{% endblock %}
+
+{% block content %}
+    <p>Hello, {{user_name | capitalize }}.</p>
+    <label for="class_select">Please, choose your class:</label>
+        <select name="classes" id="class_select">
+            {% for item in classes %}
+                <option value="{{ item }}">{{item |capitalize }}</option>
+            {% endfor %}
+        </select>
+    <form action="{{ url_for('profile', name=user_name) }}" method="POST">
+        <input type="submit" value="Выйти">
+    </form>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends 'home_page.html' -%}
+
+{% block title %}
+TecHeres Classes
+{% endblock %}
+
+{% block content %}
+<div class="content">
+     <h1> Heres is list of all TecHeres classes.</h1>
+    <ul class="classes">
+    {% for class in class_list -%}
+        <li> <a href="{{ url_for('class_descr', class_name=class.name) }}">{{ class.name }}</a> - {{ class.descr }}</li>
+    {% endfor %}
+    </ul>
+</div>
+
+{% endblock %}
+
