@@ -2,7 +2,7 @@ from app import *
 from flask import render_template, url_for, \
     request, flash, session, redirect, abort, g
 from werkzeug.security import check_password_hash, generate_password_hash
-from flask_login import login_user, logout_user, login_required
+from flask_login import login_user, logout_user, login_required, current_user
 from scripts.DataBase import *
 from scripts.UserLogin import *
 
@@ -25,9 +25,11 @@ pages_list = [
 
 dbase: DataBase = None
 
+
 @login_manager.user_loader
 def load_user(user_id):
     return UserLogin().fromDB(user_id, dbase)
+
 
 @app.before_first_request
 def get_db() -> sqlite3.Connection:
@@ -77,6 +79,7 @@ def profile(name):
     if 'UserLogged' in session and session['UserLogged'] == name:
         if request.method == 'POST':
             session.pop('UserLogged')
+            logout_user()
             return redirect(url_for('login'))
         return render_template('player_greeting.html',
                                user_name=name, classes=player_classes,
@@ -118,8 +121,11 @@ def register():
         name, email, psw, rep_psw = request.form['username'],\
                                     request.form['email'], request.form['psw'], request.form['repeat psw']
         res = dbase.addUser(name, email, generate_password_hash(psw)) if psw == rep_psw else "Passwords don't match"
+
         flash(res, 'success' if res == 'Successfully added' else 'error')
         if res == 'Successfully added':
+            user = UserLogin().create(dbase.getUser(name))
+            login_user(user)
             session['UserLogged'] = name
             return redirect(url_for('profile', name=session['UserLogged'],
                                     pages_list=pages_list))
