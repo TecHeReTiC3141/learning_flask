@@ -63,6 +63,7 @@ def class_descr(class_name):
 
 
 @app.route('/feedback', methods=['POST', 'GET'])
+@login_required
 def feedback():
     if request.method == 'POST':
         if len(request.form['username']) > 3:
@@ -75,10 +76,10 @@ def feedback():
 
 
 @app.route('/profile/<name>', methods=['POST', 'GET'])
+@login_required
 def profile(name):
-    if 'UserLogged' in session and session['UserLogged'] == name:
+    if current_user.name == name:
         if request.method == 'POST':
-            session.pop('UserLogged')
             logout_user()
             flash('Successfully logout', category='success')
             return redirect(url_for('login'))
@@ -90,8 +91,8 @@ def profile(name):
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
-    if current_user.is_authorized:
-        return redirect(url_for('profile', name=session['UserLogged'],
+    if current_user.is_authenticated:
+        return redirect(url_for('profile', name=current_user.name,
                                 pages_list=pages_list))
     elif request.method == 'POST':
         user = dbase.getUser(request.form['username'])
@@ -105,7 +106,7 @@ def login():
                 remember = True if request.form.get('remember') else False
                 login_user(user_login, remember=remember)
                 flash('Successfully logged', category='success')
-                return redirect(request.args.get('next') or url_for('profile', name=session['UserLogged'],
+                return redirect(request.args.get('next') or url_for('profile', name=current_user.name,
                                         pages_list=pages_list))
             else:
                 flash('Wrong username or password', category='error')
@@ -115,8 +116,8 @@ def login():
 
 @app.route('/register', methods=['POST', 'GET'])
 def register():
-    if current_user.is_authorized:
-        return redirect(url_for('profile', name=session['UserLogged'],
+    if current_user.is_authenticated:
+        return redirect(url_for('profile', name=current_user.name,
                                 pages_list=pages_list))
     if request.method == 'POST':
         name, email, psw, rep_psw = request.form['username'],\
@@ -127,7 +128,7 @@ def register():
         if res == 'Successfully added':
             user = UserLogin().create(dbase.getUser(name))
             login_user(user)
-            return redirect(url_for('profile', name=session['UserLogged'],
+            return redirect(url_for('profile', name=current_user.name,
                                     pages_list=pages_list))
     return render_template('register.html')
 
@@ -148,13 +149,13 @@ def show_article(title):
         abort(404)
     if 'articles_visits' not in session:
         session['articles_visits'] = {}
-    if 'UserLogged' in session:
+    if current_user.is_authenticated:
         if title not in session['articles_visits']:
-            session['articles_visits'][title] = [session['UserLogged']]
+            session['articles_visits'][title] = [current_user.name]
             session.modified = True
             dbase.viewNews(title)
-        elif session['UserLogged'] not in session['articles_visits'][title]:
-            session['articles_visits'][title].append(session['UserLogged'])
+        elif current_user.name not in session['articles_visits'][title]:
+            session['articles_visits'][title].append(current_user.name)
             session.modified = True
             dbase.viewNews(title)
     print(session['articles_visits'])
@@ -165,11 +166,9 @@ def show_article(title):
 @app.route('/add_article', methods=['POST', 'GET'])
 @login_required
 def add_article():
-    if 'UserLogged' not in session:
-        return redirect(url_for('login'))
     if request.method == 'POST':
         title, content = request.form['title'], request.form['text']
-        res = dbase.addNews(title, content, session['UserLogged'])
+        res = dbase.addNews(title, content, current_user.name)
         flash(res, 'success' if res == 'Successfully added' else 'error')
         if res == 'Successfully added':
             return redirect(url_for('show_article', title=title))
