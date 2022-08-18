@@ -1,6 +1,6 @@
 from app import *
 from flask import render_template, url_for, \
-    request, flash, session, redirect, abort, g
+    request, flash, session, redirect, abort, g, make_response
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_login import login_user, logout_user, login_required, current_user
 from scripts.DataBase import *
@@ -75,6 +75,17 @@ def feedback():
     return render_template('feedback.html')
 
 
+@app.route('/avatar')
+@login_required
+def get_avatar():
+    img = current_user.avatar
+    if not img:
+        img = ''
+    resp = make_response(img)
+    resp.headers['Content-type'] = 'image/png'
+    return resp
+
+
 @app.route('/profile/<name>', methods=['POST', 'GET'])
 @login_required
 def profile(name):
@@ -84,9 +95,14 @@ def profile(name):
             flash('Successfully logout', category='success')
             return redirect(url_for('login'))
         return render_template('player_greeting.html',
-                               user_name=name, classes=player_classes,
+                               user_name=name, user=current_user, classes=player_classes,
                                pages_list=pages_list)
     abort(401)
+
+
+@app.route('/upload')
+def upload():
+    pass
 
 
 @app.route('/login', methods=['POST', 'GET'])
@@ -107,7 +123,7 @@ def login():
                 login_user(user_login, remember=remember)
                 flash('Successfully logged', category='success')
                 return redirect(request.args.get('next') or url_for('profile', name=current_user.name,
-                                        pages_list=pages_list))
+                                                                    pages_list=pages_list))
             else:
                 flash('Wrong username or password', category='error')
 
@@ -120,7 +136,7 @@ def register():
         return redirect(url_for('profile', name=current_user.name,
                                 pages_list=pages_list))
     if request.method == 'POST':
-        name, email, psw, rep_psw = request.form['username'],\
+        name, email, psw, rep_psw = request.form['username'], \
                                     request.form['email'], request.form['psw'], request.form['repeat psw']
         res = dbase.addUser(name, email, generate_password_hash(psw)) if psw == rep_psw else "Passwords don't match"
 

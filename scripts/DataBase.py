@@ -72,12 +72,12 @@ class DataBase:
         return self.getData(request)
 
     def getUserbyId(self, id):
-        request = '''SELECT id, name, password FROM users 
+        request = '''SELECT * FROM users 
                     WHERE id = (?)'''
         return self.getData(request, (id,), fetch='one')
 
     def getUser(self, username):
-        request = '''SELECT id, name, password FROM users 
+        request = '''SELECT * FROM users 
                     WHERE name = (?)'''
         return self.getData(request, (username,), fetch='one')
 

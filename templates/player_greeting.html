@@ -8,14 +8,26 @@ Hello
     {% for cat, msg in get_flashed_messages(True) %}
         <div class="flash {{ cat }}"> {{ msg }} </div>
     {% endfor %}
-    <p>Hello, {{user_name | capitalize }}.</p>
-    <label for="class_select">Please, choose your class:</label>
-        <select name="classes" id="class_select">
-            {% for item in classes %}
-                <option value="{{ item }}">{{item | capitalize }}</option>
-            {% endfor %}
-        </select>
-    <form action="{{ url_for('profile', name=user_name) }}" method="POST">
-        <input type="submit" value="Выйти">
+    <br>
+    <div style="vert-align: top; float: left">
+        <div class="profile-ava">
+            <img src="{{ url_for("get_avatar") }}" alt="user_avatar" width="200" height="200">
+        </div>
+        <form action="{{ url_for('upload') }}">
+            <p><input type="file" name="filename"></p>
+            <p><input type="submit" value="Upload"></p>
+        </form>
+    </div>
+    <p>Hello, {{user.name | capitalize }}.</p>
+{#    <label for="class_select">Please, choose your class:</label>#}
+{#        <select name="classes" id="class_select">#}
+{#            {% for item in classes %}#}
+{#                <option value="{{ item }}">{{item | capitalize }}</option>#}
+{#            {% endfor %}#}
+{#        </select>#}
+    <p>Email: {{ user.email }}</p>
+    <form action="{{ url_for('profile', name=user.name) }}" method="POST">
+        <input type="submit" value="Logout">
     </form>
+
 {% endblock %}
