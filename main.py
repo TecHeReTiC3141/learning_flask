@@ -100,9 +100,16 @@ def profile(name):
     abort(401)
 
 
-@app.route('/upload')
+@app.route('/upload', methods=['POST', 'GET'])
 def upload():
-    pass
+    if request.method == 'POST':
+        img = request.files['file']
+        if img and current_user.checkExt(img.filename):
+            res = dbase.updateUserAvatar(img.read(), current_user.get_id())
+            flash(res, category='success' if res == 'Successfully modified' else 'error')
+        else:
+            flash('Wrong image extension. Please, use PNG', category='error')
+    return redirect(url_for('profile', name=current_user.name))
 
 
 @app.route('/login', methods=['POST', 'GET'])
@@ -152,7 +159,7 @@ def register():
 @app.route('/news')
 def news_list():
     news = dbase.getNews()
-    top_users = dbase.get_top_k_users()
+    top_users = dbase.getTopKUsers()
     return render_template('news.html', news_list=news, top_users=top_users)
 
 

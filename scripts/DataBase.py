@@ -81,7 +81,7 @@ class DataBase:
                     WHERE name = (?)'''
         return self.getData(request, (username,), fetch='one')
 
-    def get_top_k_users(self, k=5):
+    def getTopKUsers(self, k=5):
         request = f'''SELECT author, SUM(views) AS views, COUNT(*) AS post
                     FROM posts JOIN users
                     ON posts.author = users.name
@@ -100,3 +100,8 @@ class DataBase:
                     VALUES (?, ?, ?)'''
 
         return self.addData(request, (name, email, psw))
+
+    def updateUserAvatar(self, img, id):
+        req = '''UPDATE users SET avatar = ? WHERE id = ?'''
+        bi = sqlite3.Binary(img)
+        return self.updateData(req, (bi, id))

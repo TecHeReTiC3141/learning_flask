@@ -5,6 +5,7 @@ from flask import url_for
 
 
 class UserLogin(UserMixin):
+    possible_exts = ['png']
 
     def create(self, user: dict) -> 'UserLogin':
         self.__user = user
@@ -36,3 +37,7 @@ class UserLogin(UserMixin):
             return img
         except Exception as e:
             print('Default not found', e)
+
+    def checkExt(self, file_name: str):
+        ext = file_name.rsplit('.', 1)[1]
+        return ext.lower() in self.possible_exts
