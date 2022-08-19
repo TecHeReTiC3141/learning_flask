@@ -1,8 +1,8 @@
 from app import *
 from flask import render_template, url_for, \
-    request, flash, session, redirect, abort, g
+    request, flash, session, redirect, abort, g, make_response
 from werkzeug.security import check_password_hash, generate_password_hash
-from flask_login import login_user, logout_user, login_required
+from flask_login import login_user, logout_user, login_required, current_user
 from scripts.DataBase import *
 from scripts.UserLogin import *
 
@@ -25,9 +25,11 @@ pages_list = [
 
 dbase: DataBase = None
 
+
 @login_manager.user_loader
 def load_user(user_id):
     return UserLogin().fromDB(user_id, dbase)
+
 
 @app.before_first_request
 def get_db() -> sqlite3.Connection:
@@ -61,6 +63,7 @@ def class_descr(class_name):
 
 
 @app.route('/feedback', methods=['POST', 'GET'])
+@login_required
 def feedback():
     if request.method == 'POST':
         if len(request.form['username']) > 3:
@@ -72,22 +75,47 @@ def feedback():
     return render_template('feedback.html')
 
 
+@app.route('/avatar')
+@login_required
+def get_avatar():
+    img = current_user.avatar
+    if not img:
+        img = ''
+    resp = make_response(img)
+    resp.headers['Content-type'] = 'image/png'
+    return resp
+
+
 @app.route('/profile/<name>', methods=['POST', 'GET'])
+@login_required
 def profile(name):
-    if 'UserLogged' in session and session['UserLogged'] == name:
+    if current_user.name == name:
         if request.method == 'POST':
-            session.pop('UserLogged')
+            logout_user()
+            flash('Successfully logout', category='success')
             return redirect(url_for('login'))
         return render_template('player_greeting.html',
-                               user_name=name, classes=player_classes,
+                               user_name=name, user=current_user, classes=player_classes,
                                pages_list=pages_list)
     abort(401)
 
 
+@app.route('/upload', methods=['POST', 'GET'])
+def upload():
+    if request.method == 'POST':
+        img = request.files['file']
+        if img and current_user.checkExt(img.filename):
+            res = dbase.updateUserAvatar(img.read(), current_user.get_id())
+            flash(res, category='success' if res == 'Successfully modified' else 'error')
+        else:
+            flash('Wrong image extension. Please, use PNG', category='error')
+    return redirect(url_for('profile', name=current_user.name))
+
+
 @app.route('/login', methods=['POST', 'GET'])
 def login():
-    if 'UserLogged' in session:
-        return redirect(url_for('profile', name=session['UserLogged'],
+    if current_user.is_authenticated:
+        return redirect(url_for('profile', name=current_user.name,
                                 pages_list=pages_list))
     elif request.method == 'POST':
         user = dbase.getUser(request.form['username'])
@@ -98,11 +126,11 @@ def login():
             user_password = user['password']
             if check_password_hash(user_password, request.form['psw']):
                 user_login = UserLogin().create(user)
-                login_user(user_login)
-                session['UserLogged'] = request.form['username']
+                remember = True if request.form.get('remember') else False
+                login_user(user_login, remember=remember)
                 flash('Successfully logged', category='success')
-                return redirect(url_for('profile', name=session['UserLogged'],
-                                        pages_list=pages_list))
+                return redirect(request.args.get('next') or url_for('profile', name=current_user.name,
+                                                                    pages_list=pages_list))
             else:
                 flash('Wrong username or password', category='error')
 
@@ -111,17 +139,19 @@ def login():
 
 @app.route('/register', methods=['POST', 'GET'])
 def register():
-    if 'UserLogged' in session:
-        return redirect(url_for('profile', name=session['UserLogged'],
+    if current_user.is_authenticated:
+        return redirect(url_for('profile', name=current_user.name,
                                 pages_list=pages_list))
     if request.method == 'POST':
-        name, email, psw, rep_psw = request.form['username'],\
+        name, email, psw, rep_psw = request.form['username'], \
                                     request.form['email'], request.form['psw'], request.form['repeat psw']
         res = dbase.addUser(name, email, generate_password_hash(psw)) if psw == rep_psw else "Passwords don't match"
+
         flash(res, 'success' if res == 'Successfully added' else 'error')
         if res == 'Successfully added':
-            session['UserLogged'] = name
-            return redirect(url_for('profile', name=session['UserLogged'],
+            user = UserLogin().create(dbase.getUser(name))
+            login_user(user)
+            return redirect(url_for('profile', name=current_user.name,
                                     pages_list=pages_list))
     return render_template('register.html')
 
@@ -129,7 +159,7 @@ def register():
 @app.route('/news')
 def news_list():
     news = dbase.getNews()
-    top_users = dbase.get_top_k_users()
+    top_users = dbase.getTopKUsers()
     return render_template('news.html', news_list=news, top_users=top_users)
 
 
@@ -142,13 +172,13 @@ def show_article(title):
         abort(404)
     if 'articles_visits' not in session:
         session['articles_visits'] = {}
-    if 'UserLogged' in session:
+    if current_user.is_authenticated:
         if title not in session['articles_visits']:
-            session['articles_visits'][title] = [session['UserLogged']]
+            session['articles_visits'][title] = [current_user.name]
             session.modified = True
             dbase.viewNews(title)
-        elif session['UserLogged'] not in session['articles_visits'][title]:
-            session['articles_visits'][title].append(session['UserLogged'])
+        elif current_user.name not in session['articles_visits'][title]:
+            session['articles_visits'][title].append(current_user.name)
             session.modified = True
             dbase.viewNews(title)
     print(session['articles_visits'])
@@ -159,11 +189,9 @@ def show_article(title):
 @app.route('/add_article', methods=['POST', 'GET'])
 @login_required
 def add_article():
-    if 'UserLogged' not in session:
-        return redirect(url_for('login'))
     if request.method == 'POST':
         title, content = request.form['title'], request.form['text']
-        res = dbase.addNews(title, content, session['UserLogged'])
+        res = dbase.addNews(title, content, current_user.name)
         flash(res, 'success' if res == 'Successfully added' else 'error')
         if res == 'Successfully added':
             return redirect(url_for('show_article', title=title))

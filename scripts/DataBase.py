@@ -71,12 +71,17 @@ class DataBase:
                                 ORDER BY name'''
         return self.getData(request)
 
+    def getUserbyId(self, id):
+        request = '''SELECT * FROM users 
+                    WHERE id = (?)'''
+        return self.getData(request, (id,), fetch='one')
+
     def getUser(self, username):
-        request = '''SELECT id, name, password FROM users 
+        request = '''SELECT * FROM users 
                     WHERE name = (?)'''
         return self.getData(request, (username,), fetch='one')
 
-    def get_top_k_users(self, k=5):
+    def getTopKUsers(self, k=5):
         request = f'''SELECT author, SUM(views) AS views, COUNT(*) AS post
                     FROM posts JOIN users
                     ON posts.author = users.name
@@ -95,3 +100,8 @@ class DataBase:
                     VALUES (?, ?, ?)'''
 
         return self.addData(request, (name, email, psw))
+
+    def updateUserAvatar(self, img, id):
+        req = '''UPDATE users SET avatar = ? WHERE id = ?'''
+        bi = sqlite3.Binary(img)
+        return self.updateData(req, (bi, id))
