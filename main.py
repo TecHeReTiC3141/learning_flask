@@ -144,9 +144,10 @@ def register():
     if current_user.is_authenticated:
         return redirect(url_for('profile', name=current_user.name,
                                 pages_list=pages_list))
-    if request.method == 'POST':
-        name, email, psw, rep_psw = request.form['username'], \
-                                    request.form['email'], request.form['psw'], request.form['repeat psw']
+    form = RegisterForm()
+    if form.validate_on_submit():
+        name, email, psw, rep_psw = form.name.data, \
+                                    form.email.data, form.password.data, form.repeat_password.data
         res = dbase.addUser(name, email, generate_password_hash(psw)) if psw == rep_psw else "Passwords don't match"
 
         flash(res, 'success' if res == 'Successfully added' else 'error')
@@ -155,7 +156,7 @@ def register():
             login_user(user)
             return redirect(url_for('profile', name=current_user.name,
                                     pages_list=pages_list))
-    return render_template('register.html')
+    return render_template('register.html', form=form)
 
 
 @app.route('/news')

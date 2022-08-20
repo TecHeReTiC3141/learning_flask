@@ -45,3 +45,10 @@ ul.pages_list > li {
     background: #333333;
 }
 
+form input.invalid {
+    background: red;
+}
+form p > span {
+    color: red;
+}
+

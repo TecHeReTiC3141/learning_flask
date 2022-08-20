@@ -15,12 +15,7 @@
     {% endfor %}
 
     <form action='' method="post" class="login-form">
-        {{ form.hidden_tag() }}
-        <p>{{ form.user.label() }} {{ form.user }}</p>
-        <p>{{ form.password.label() }} {{ form.password }}</p>
-        <p>{{ form.remember.label() }} {{ form.remember }}</p>
-        <p>{{ form.submit }}</p>
-
+        {{ display_form(form) }}
     </form>
     <p> Or <a href="{{ url_for('register') }}">register</a> if you haven't created account yet</p>
 {% endblock %}
