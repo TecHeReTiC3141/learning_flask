@@ -28,8 +28,8 @@
 {% block content %}
     <div class="content">
 
-    {% if'UserLogged' in session %}
-        <h1>Hello, {{ session['UserLogged'] }}! Here's what you can do here:</h1>
+    {% if current_user.is_authenticated %}
+        <h1>Hello, {{ current_user.name }}! Here's what you can do here:</h1>
     {% else %}
         <h1>Hello, anybody. Please <a href="{{ url_for('login') }}">Login</a>
             or <a href="{{ url_for('register') }}">register</a> to open all functionality of site</h1>

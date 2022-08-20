@@ -15,16 +15,12 @@
     {% endfor %}
 
     <form action='' method="post" class="login-form">
-        <p><label> UserName
-            <input type="text" name="username" value="" required>
-        </label></p>
-        <p><label> Password
-            <input type="password" name="psw" value="" required>
-        </label></p>
-        <p><label>
-            <input type="checkbox" name="remember" value=""> Remember me
-        </label></p>
-        <input type="submit" value="Send">
+        {{ form.hidden_tag() }}
+        <p>{{ form.user.label() }} {{ form.user }}</p>
+        <p>{{ form.password.label() }} {{ form.password }}</p>
+        <p>{{ form.remember.label() }} {{ form.remember }}</p>
+        <p>{{ form.submit }}</p>
+
     </form>
     <p> Or <a href="{{ url_for('register') }}">register</a> if you haven't created account yet</p>
 {% endblock %}

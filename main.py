@@ -5,6 +5,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from flask_login import login_user, logout_user, login_required, current_user
 from scripts.DataBase import *
 from scripts.UserLogin import *
+from scripts.WTForms import *
 
 player_classes = ['choose your class', 'medic',
                   'scout', 'soldier']
@@ -47,7 +48,7 @@ def get_dbase():
 @app.route('/')
 @app.route('/mainpage')
 def homepage():
-    return render_template('home_page.html')
+    return render_template('home_page.html', current_user=current_user)
 
 
 @app.route('/classes')
@@ -117,16 +118,17 @@ def login():
     if current_user.is_authenticated:
         return redirect(url_for('profile', name=current_user.name,
                                 pages_list=pages_list))
-    elif request.method == 'POST':
-        user = dbase.getUser(request.form['username'])
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = dbase.getUser(form.user.data)
 
         if not user:
             flash('Wrong username or password', category='error')
         else:
             user_password = user['password']
-            if check_password_hash(user_password, request.form['psw']):
+            if check_password_hash(user_password, form.password.data):
                 user_login = UserLogin().create(user)
-                remember = True if request.form.get('remember') else False
+                remember = True if form.remember.data else False
                 login_user(user_login, remember=remember)
                 flash('Successfully logged', category='success')
                 return redirect(request.args.get('next') or url_for('profile', name=current_user.name,
@@ -134,7 +136,7 @@ def login():
             else:
                 flash('Wrong username or password', category='error')
 
-    return render_template('login.html')
+    return render_template('login.html', form=form)
 
 
 @app.route('/register', methods=['POST', 'GET'])
