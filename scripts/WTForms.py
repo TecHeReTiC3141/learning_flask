@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField,\
-    EmailField, PasswordField, BooleanField
+    EmailField, PasswordField, BooleanField, TextAreaField
 from wtforms.validators import Email, Length, DataRequired, EqualTo
 
 
@@ -19,4 +19,9 @@ class RegisterForm(FlaskForm):
     password = PasswordField('Password', validators=[Length(min=3, max=50), DataRequired()])
     repeat_password = PasswordField('Repeat Password',
                                     validators=[Length(min=3, max=50), DataRequired(), EqualTo('password')])
+    submit = SubmitField('Send')
+
+
+class FeedbackForm(FlaskForm):
+    message = TextAreaField('Message', validators=[DataRequired(), Length(min=10)])
     submit = SubmitField('Send')

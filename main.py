@@ -66,14 +66,11 @@ def class_descr(class_name):
 @app.route('/feedback', methods=['POST', 'GET'])
 @login_required
 def feedback():
-    if request.method == 'POST':
-        if len(request.form['username']) > 3:
-            flash('Successfully sent', category='success')
-        else:
-            flash('Error while sending', category='error')
-        print(request.form)
+    form = FeedbackForm()
+    if form.validate_on_submit():
+        flash('Successfully sent. Thank you', category='success')
 
-    return render_template('feedback.html')
+    return render_template('feedback.html', form=form, form2=1)
 
 
 @app.route('/avatar')
@@ -128,7 +125,8 @@ def login():
             user_password = user['password']
             if check_password_hash(user_password, form.password.data):
                 user_login = UserLogin().create(user)
-                remember = True if form.remember.data else False
+                print(form.remember.data)
+                remember = form.remember.data
                 login_user(user_login, remember=remember)
                 flash('Successfully logged', category='success')
                 return redirect(request.args.get('next') or url_for('profile', name=current_user.name,
@@ -148,7 +146,7 @@ def register():
     if form.validate_on_submit():
         name, email, psw, rep_psw = form.name.data, \
                                     form.email.data, form.password.data, form.repeat_password.data
-        res = dbase.addUser(name, email, generate_password_hash(psw)) if psw == rep_psw else "Passwords don't match"
+        res = dbase.addUser(name, email, generate_password_hash(psw))
 
         flash(res, 'success' if res == 'Successfully added' else 'error')
         if res == 'Successfully added':
