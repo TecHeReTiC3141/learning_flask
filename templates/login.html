@@ -15,16 +15,7 @@
     {% endfor %}
 
     <form action='' method="post" class="login-form">
-        <p><label> UserName
-            <input type="text" name="username" value="" required>
-        </label></p>
-        <p><label> Password
-            <input type="password" name="psw" value="" required>
-        </label></p>
-        <p><label>
-            <input type="checkbox" name="remember" value=""> Remember me
-        </label></p>
-        <input type="submit" value="Send">
+        {{ display_form(form) }}
     </form>
     <p> Or <a href="{{ url_for('register') }}">register</a> if you haven't created account yet</p>
 {% endblock %}

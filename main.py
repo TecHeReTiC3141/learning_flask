@@ -5,6 +5,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from flask_login import login_user, logout_user, login_required, current_user
 from scripts.DataBase import *
 from scripts.UserLogin import *
+from scripts.WTForms import *
 
 player_classes = ['choose your class', 'medic',
                   'scout', 'soldier']
@@ -47,7 +48,7 @@ def get_dbase():
 @app.route('/')
 @app.route('/mainpage')
 def homepage():
-    return render_template('home_page.html')
+    return render_template('home_page.html', current_user=current_user)
 
 
 @app.route('/classes')
@@ -65,14 +66,11 @@ def class_descr(class_name):
 @app.route('/feedback', methods=['POST', 'GET'])
 @login_required
 def feedback():
-    if request.method == 'POST':
-        if len(request.form['username']) > 3:
-            flash('Successfully sent', category='success')
-        else:
-            flash('Error while sending', category='error')
-        print(request.form)
+    form = FeedbackForm()
+    if form.validate_on_submit():
+        flash('Successfully sent. Thank you', category='success')
 
-    return render_template('feedback.html')
+    return render_template('feedback.html', form=form, form2=1)
 
 
 @app.route('/avatar')
@@ -117,16 +115,18 @@ def login():
     if current_user.is_authenticated:
         return redirect(url_for('profile', name=current_user.name,
                                 pages_list=pages_list))
-    elif request.method == 'POST':
-        user = dbase.getUser(request.form['username'])
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = dbase.getUser(form.user.data)
 
         if not user:
             flash('Wrong username or password', category='error')
         else:
             user_password = user['password']
-            if check_password_hash(user_password, request.form['psw']):
+            if check_password_hash(user_password, form.password.data):
                 user_login = UserLogin().create(user)
-                remember = True if request.form.get('remember') else False
+                print(form.remember.data)
+                remember = form.remember.data
                 login_user(user_login, remember=remember)
                 flash('Successfully logged', category='success')
                 return redirect(request.args.get('next') or url_for('profile', name=current_user.name,
@@ -134,7 +134,7 @@ def login():
             else:
                 flash('Wrong username or password', category='error')
 
-    return render_template('login.html')
+    return render_template('login.html', form=form)
 
 
 @app.route('/register', methods=['POST', 'GET'])
@@ -142,10 +142,11 @@ def register():
     if current_user.is_authenticated:
         return redirect(url_for('profile', name=current_user.name,
                                 pages_list=pages_list))
-    if request.method == 'POST':
-        name, email, psw, rep_psw = request.form['username'], \
-                                    request.form['email'], request.form['psw'], request.form['repeat psw']
-        res = dbase.addUser(name, email, generate_password_hash(psw)) if psw == rep_psw else "Passwords don't match"
+    form = RegisterForm()
+    if form.validate_on_submit():
+        name, email, psw, rep_psw = form.name.data, \
+                                    form.email.data, form.password.data, form.repeat_password.data
+        res = dbase.addUser(name, email, generate_password_hash(psw))
 
         flash(res, 'success' if res == 'Successfully added' else 'error')
         if res == 'Successfully added':
@@ -153,7 +154,7 @@ def register():
             login_user(user)
             return redirect(url_for('profile', name=current_user.name,
                                     pages_list=pages_list))
-    return render_template('register.html')
+    return render_template('register.html', form=form)
 
 
 @app.route('/news')

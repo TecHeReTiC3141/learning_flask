@@ -28,7 +28,6 @@ ul.pages_list {
 
 ul.pages_list a {
     color: whitesmoke;
-
 }
 
 ul.pages_list > li:hover {
@@ -43,5 +42,12 @@ ul.pages_list > li {
     color: whitesmoke;
     float: left;
     background: #333333;
+}
+
+form input.invalid {
+    background: red;
+}
+form p > span {
+    color: red;
 }
 

@@ -15,19 +15,7 @@
     {% endfor %}
     <h1>Hello user. Register, please, to unlock all site's opportunities</h1>
     <form action='{{ url_for('register') }}' method="post" class="login-form">
-        <p><label> UserName
-            <input type="text" name="username" value="" required>
-        </label></p>
-        <p><label> Email
-            <input type="email" name="email" value="" required>
-        </label></p>
-        <p><label> Password
-            <input type="password" name="psw" value="" required>
-        </label></p>
-        <p><label> Repeat Password
-            <input type="password" name="repeat psw" value="" required>
-        </label></p>
-        <input type="submit" value="Send">
+        {{ display_form(form) }}
     </form>
     <p> Or <a href="{{ url_for('login') }}">login</a> if you have already created account</p>
 
