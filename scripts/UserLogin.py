@@ -18,6 +18,9 @@ class UserLogin(UserMixin):
     def get_id(self):
         return str(self.__user['id'])
 
+    def is_admin(self):
+        return self.__user['is_admin'] if self.__user else None
+
     @property
     def name(self):
         return self.__user['name'] if self.__user else 'No name'

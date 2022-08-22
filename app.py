@@ -2,6 +2,7 @@ from flask import Flask
 from flask_login import LoginManager
 from pathlib import Path
 import sqlite3
+from admin.admin import admin
 
 DATABASE = 'tmp/test_db.db'
 SECRET_KEY = 'e7463a675de3b7453990742469ba869b57086d6e'
@@ -10,6 +11,8 @@ MAX_CONTENT_SIZE = 1024 * 1024
 app = Flask(__name__)
 app.config.from_object(__name__)
 app.config.update({'DATABASE': Path(app.root_path) / DATABASE})
+
+app.register_blueprint(admin, url_prefix='/admin')
 
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'

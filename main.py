@@ -7,6 +7,7 @@ from scripts.DataBase import *
 from scripts.UserLogin import *
 from scripts.WTForms import *
 
+
 player_classes = ['choose your class', 'medic',
                   'scout', 'soldier']
 

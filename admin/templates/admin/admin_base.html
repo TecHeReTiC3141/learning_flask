@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+
+{% macro display_form(form) %}
+    {{ form.hidden_tag() }}
+    {% for field in form if field.name not in ['csrf_token', 'submit'] %}
+        {% if field.errors %}
+            <p>{{ field.label() }} {{ field(class='invalid') }}<span>{% for err in field.errors %}
+                {{ err }}
+            {% endfor %}</span></p>
+        {% else %}
+            <p>{{ field.label() }} {{ field() }}</p>
+        {% endif %}
+    {% endfor %}
+    <p>{{ form.submit }}</p>
+{% endmacro %}
+
+<html lang="en">
+{% block head %}
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %} HomePage {% endblock %}</title>
+    <link type="text/css" rel="stylesheet" href="{{ url_for('.static', filename='css/main_appear.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename="images/favicon.ico") }}">
+
+</head>
+{% endblock %}
+
+<body>
+{% block header %}
+
+<header>
+    <h1>Admin panel</h1>
+    <ul class="pages_list">
+        {% for page in pages_list %}
+            <li> <a href="{{ url_for(page.url) }}"> {{ page.descr }} </a> </li>
+        {% endfor %}
+    </ul>
+    <br>
+    <br>
+</header>
+{% endblock %}
+
+{% block content %}
+    <div class="content">
+
+</div>
+{% endblock %}
+
+{% block footer %}
+    <footer>
+        <h3><b><a href="/">TecGame</a>, best online game ever</b></h3>
+        <br>
+    </footer>
+
+</body>
+</html>
+{% endblock %}
