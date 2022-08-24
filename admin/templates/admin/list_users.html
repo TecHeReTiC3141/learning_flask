@@ -1,0 +1,19 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block content %}
+<table>
+<tr>
+    <th>UserName</th>
+    <th>Email</th>
+    <th>Is admin</th>
+</tr>
+{% for user in users %}
+    <tr>
+    <td>{{ user.name }}</td>
+    <td>{{ user.email }}</td>
+    <td>{{ user.is_admin }}</td>
+    </tr>
+{% endfor %}
+</table>
+
+{% endblock %}
